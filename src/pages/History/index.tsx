@@ -1,113 +1,56 @@
-import styled from "styled-components";
-import { HistoryContainer, TableContainer } from "./styles";
+import { useContext } from "react";
+import { CyclesContext } from "../../contexts/CycleContext";
+import { formatDistanceToNow, differenceInMinutes } from "date-fns";
+import ptBR from "date-fns/esm/locale/pt-BR";
 
-const History = () => {
+import { HistoryContainer, HistoryList, Status } from "./styles";
+
+
+export function History() {
+  const { cycles } = useContext(CyclesContext);
+  
   return (
     <HistoryContainer>
-      <h1>My History</h1>
-      <TableContainer>
+      <h1>History</h1>
+
+      <HistoryList>
         <table>
           <thead>
             <tr>
               <th>Tarefa</th>
               <th>Duração</th>
-              <th>Completada</th>
-              <th>Excluir</th>
+              <th>Início</th>
+              <th>Status</th>
             </tr>
           </thead>
+
           <tbody>
-            <tr>
-              <td>Estudar React</td>
-              <td>25 minutos</td>
-              <td>ha 2 meses</td>
-              <td>
-                <Status status="concluido">Concluido</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Estudar React</td>
-              <td>25 minutos</td>
-              <td>ha 2 meses</td>
-              <td>
-                <Status status="concluido">Concluido</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Estudar React</td>
-              <td>25 minutos</td>
-              <td>ha 2 meses</td>
-              <td>
-                <Status status="concluido">Concluido</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Estudar React</td>
-              <td>25 minutos</td>
-              <td>ha 2 meses</td>
-              <td>
-                <Status status="concluido">Concluido</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Estudar React</td>
-              <td>25 minutos</td>
-              <td>ha 2 meses</td>
-              <td>
-                <Status status="concluido">Concluido</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Estudar React</td>
-              <td>25 minutos</td>
-              <td>ha 2 meses</td>
-              <td>
-                <Status status="concluido">Concluido</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Estudar React</td>
-              <td>25 minutos</td>
-              <td>ha 2 meses</td>
-              <td>
-                <Status status="concluido">Concluido</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Estudar React</td>
-              <td>25 minutos</td>
-              <td>ha 2 meses</td>
-              <td>
-                <Status status="concluido">Concluido</Status>
-              </td>
-            </tr>
+            {cycles.map((cycle) => {
+              return (
+                <tr key={cycle.id}>
+                  <td>{cycle.task}</td>
+                  <td>
+                    {cycle.interruptedDate && differenceInMinutes(cycle.interruptedDate, cycle.startDate) + ' minutos'} 
+                    {!cycle.interruptedDate && cycle.minutesAmount + ' minutos'} 
+                  </td>
+                  <td>{formatDistanceToNow(cycle.startDate, {addSuffix: true, locale:ptBR})}</td>
+                  <td>
+                    {cycle.finishedDate && (
+                      <Status statusColor="green">Concluído</Status>
+                    )}
+                    {cycle.interruptedDate && (
+                      <Status statusColor="red">Interrompido</Status>
+                    )}
+                    {!cycle.finishedDate && !cycle.interruptedDate && (
+                      <Status statusColor="yellow">Em andamento</Status>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
-      </TableContainer>
+      </HistoryList>
     </HistoryContainer>
   );
-};
-
-export default History;
-
-const STATUS_COLORS = {
-  concluido: "green-500",
-  pendente: "yellow-500",
-} as const;
-
-interface StatusProps {
-  status: keyof typeof STATUS_COLORS;
 }
-
-export const Status = styled.span<StatusProps>`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  &::before {
-    content: "";
-    width: 0.8rem;
-    height: 0.8rem;
-    border-radius: 50%;
-    background: ${(props) => props.theme[STATUS_COLORS[props.status]]};
-  }
-`;
